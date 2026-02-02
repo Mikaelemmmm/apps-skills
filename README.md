@@ -1,29 +1,3 @@
----
-name: apps-skills
-description: |
-  构建的企业级内部微服务基础框架，适用于单体应用和微服务架构，支持企业内部开箱即用。
-  所有服务代码都是基于protobuf，HTTP、RPC、MQ必须先定义protobuf。
-
-  **适用场景：**
-  - 创建/编写 HTTP 服务（app/apis 下的 REST API 服务）
-  - 创建/编写 RPC 服务（app/services 下的 gRPC 服务）
-  - 数据库操作（GORM、MongoDB、Redis 缓存）
-  - 熔断、限流、负载保护
-  - 问题排查与框架约定理解
-  - 生成生产级微服务代码
-
-  **特性：**
-  - 完整的模式指南，包含正确示例与错误示例
-  - 生产级最佳实践
-  - 常见问题与解决方案
-
-license: MIT
-allowed-tools:
-  - Read
-  - Grep
-  - Glob
----
-
 # apps skills
 
 本技能包提供企业级内部微服务基础框架开发规范，专为 AI Agent 优化，帮助开发者构建生产级服务。覆盖内容：REST API、RPC 服务、数据库操作、系统韧性设计、问题排查、日志与错误码处理。
