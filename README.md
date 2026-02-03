@@ -156,7 +156,7 @@ make gen type=services srv=core/user   # 生成 gRPC 服务
 make errcode
 
 # 生成数据库 Model
-make model db=admin_mgr table=sys_role service=apis/mgr/admin
+make model db=services_core_user table=sys_role service=services/core/user
 
 # 生成 Swagger 文档
 make doc type=apis
