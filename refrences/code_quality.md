@@ -164,9 +164,6 @@ func TestValidateEmail(t *testing.T) {
 
 ```bash
 # 运行 golangci-lint
-# lint changed file,recommend
-make lint-changed
-# lint all file
 make lint
 
 # 或直接运行
