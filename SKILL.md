@@ -8,6 +8,8 @@ description: |
   - 创建/编写 HTTP 服务（app/apis 下的 REST API 服务）
   - 创建/编写 RPC 服务（app/services 下的 gRPC 服务）
   - 数据库操作（GORM、MongoDB、Redis 缓存）
+  - revew code ,代码审查
+  - 单元测试
   - 熔断、限流、负载保护
   - 问题排查与框架约定理解
   - 生成生产级微服务代码
@@ -193,6 +195,8 @@ make mock
 
 ### 代码质量检查
 
+编写代码必须符合 项目根目录下的.golangci.yml中的规范
+
 ```bash
 # 运行 golangci-lint 检查
 make lint
@@ -200,19 +204,17 @@ make lint
 # 运行单元测试
 make test
 
-# 自动修复代码格式
-make format
 ```
 
 ---
 
 ## 代码质量规范
 
-| 项目            | 要求                                        | 说明                       |
-| --------------- | ------------------------------------------- | -------------------------- |
-| **单元测试**    | 必须通过 pkg ≥ 90%, app/logic+manager ≥ 80% | 排除 \_.pb.go, mock\_\_.go |
-| **Lint 检查**   | 必须通过 golangci-lint                      | 见下方规则                 |
-| **代码 Review** | 必须通过 Code Review                        | 见下方检查点               |
+| 项目            | 要求                                            | 说明                       |
+| --------------- | ----------------------------------------------- | -------------------------- |
+| **单元测试**    | 必须通过 pkg ≥ 90%, app/logic+manager ≥ 80%     | 排除 \_.pb.go, mock\_\_.go |
+| **Lint 检查**   | 必须通过 golangci-lint,v2版本,test file no lint | 见下方规则，不要使用v1版本 |
+| **代码 Review** | 必须通过 Code Review                            | 见下方检查点               |
 
 详细规范参考：[code_quality.md](refrences/code_quality.md)
 
