@@ -293,3 +293,65 @@ cache:platformUser:user:mobile:13800138000
 | 文件 | 说明 |
 |-----|------|
 | [mysql.md](../example/database/mysql.md) | MySQL Model 完整示例 |
+
+---
+
+## SQL 迁移脚本规范
+
+### 文件命名
+
+```
+deploy/migration/services_{service_name}.sql
+```
+
+示例：
+- `services_support_comment.sql` - 评论服务
+- `services_core_user.sql` - 用户服务
+
+### 文件格式
+
+```sql
+/*
+ * Migration: XXX Service Tables
+ * Database: services_xxx
+ * Description: XXX服务相关表
+ */
+
+-- ----------------------------
+-- Create database if not exists
+-- ----------------------------
+CREATE DATABASE IF NOT EXISTS services_xxx DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+
+USE services_xxx;
+
+-- ----------------------------
+-- Table structure for table_name
+-- ----------------------------
+DROP TABLE IF EXISTS `table_name`;
+CREATE TABLE `table_name` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '编号',
+  ...
+  PRIMARY KEY (`id`) USING BTREE,
+  ...
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '表说明' ROW_FORMAT = Dynamic;
+
+SET FOREIGN_KEY_CHECKS = 1;
+```
+
+### 关键规则
+
+1. **字符集和排序规则**：使用 `utf8mb4_general_ci`
+2. **id 字段**：`bigint unsigned NOT NULL AUTO_INCREMENT`
+3. **时间字段**：使用 `bigint`（时间戳）而非 `datetime`
+4. **表选项**：
+   - `ENGINE = InnoDB`
+   - `AUTO_INCREMENT = 1`
+   - `CHARACTER SET = utf8mb4`
+   - `COLLATE = utf8mb4_general_ci`
+   - `ROW_FORMAT = Dynamic`
+5. **外键检查**：文件末尾添加 `SET FOREIGN_KEY_CHECKS = 0;`（不启用外键检查）
+6. **注释规范**：使用 `COMMENT` 添加字段说明
+
+### 完整示例
+
+参考 `deploy/migration/services_support_comment.sql`
