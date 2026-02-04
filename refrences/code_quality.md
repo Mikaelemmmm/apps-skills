@@ -1,6 +1,7 @@
 # 代码质量规范
 
 本文档规范项目的代码质量要求，包括单元测试、Lint 检查和 Code Review。
+编写代码必须符合 项目根目录下的.golangci.yml中的规范
 
 ---
 
@@ -163,6 +164,9 @@ func TestValidateEmail(t *testing.T) {
 
 ```bash
 # 运行 golangci-lint
+# lint changed file,recommend
+make lint-changed
+# lint all file
 make lint
 
 # 或直接运行
