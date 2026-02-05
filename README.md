@@ -98,11 +98,11 @@ apps-skills/
 ├── references/                        # 模式参考文档（规范说明）
 │   ├── proto_patterns.md
 │   ├── rest_api_patterns.md
-│   ├── rpc_service_patterns.md
-│   ├── rest_api_mq_patterns.md
 │   ├── rest_api_job_patterns.md
-│   ├── rpc_service_mq_patterns.md
+│   ├── rest_api_mq_patterns.md
+│   ├── rpc_service_patterns.md
 │   ├── rpc_service_job_patterns.md
+│   ├── rpc_service_mq_patterns.md
 │   ├── database_patterns.md
 │   ├── error_code_and_log_patterns.md
 │   └── code_quality.md
