@@ -11,7 +11,8 @@ internal/repository/
 ├── adapter/               # 三方服务适配器
 │   └── thirdauth/         # 三方授权适配器
 ├── rpc/                   # RPC 客户端
-└── xredis/                # Redis 操作
+├── xredis/                # Redis 操作
+└── event/                 # MQ 事件发送（按业务分包）
 ```
 
 ## repository.go
@@ -24,7 +25,10 @@ package repository
 import (
 	"apps/app/apis/stayy/api/internal/config"
 	"apps/app/apis/stayy/api/internal/repository/adapter/thirdauth"
+	"apps/app/apis/stayy/api/internal/repository/event"
 	"apps/app/apis/stayy/api/internal/repository/rpc"
+	"apps/pkg/queue/kafka"
+	"github.com/zeromicro/go-zero/core/stores/redis"
 )
 
 // Repository 依赖容器
@@ -32,14 +36,21 @@ type Repository struct {
 	AuthSrv          *AuthzSrvType
 	UserSrv          *UserSrvType
 	WXMiniAuthClient *ThirdAuthManager
+	TokenRdsModel    TokenRdsModelType
+	NotifyEvent     NotifyEventType
 }
 
 // NewRepository 创建 Repository
 func NewRepository(c config.Config) *Repository {
+	redisDB := redis.MustNewRedis(c.Redis.RedisConf)
+	pusher := kafka.MustNewPusher(c.MQ.KafkaPusherConf)
+
 	return &Repository{
-		AuthSrv:          rpc.NewAuthzSrv(c.RPC.AuthzSrvConf), // 鉴权服务
-		UserSrv:          rpc.NewUserSrv(c.RPC.UserSrvConf),   // 用户服务
-		WXMiniAuthClient: thirdauth.NewManager(c),             // 三方授权管理
+		AuthSrv:          rpc.NewAuthzSrv(c.RPC.AuthzSrvConf),        // 鉴权服务
+		UserSrv:          rpc.NewUserSrv(c.RPC.UserSrvConf),          // 用户服务
+		WXMiniAuthClient: thirdauth.NewManager(c),                       // 三方授权管理
+		TokenRdsModel:    xredis.NewTokenModel(redisDB, c.Redis.Key),       // Token 管理
+		NotifyEvent:     event.NewNotifyEvent(pusher, "notify"),             // 通知事件
 	}
 }
 ```
@@ -53,14 +64,18 @@ package repository
 
 import (
 	"apps/app/apis/stayy/api/internal/repository/adapter/thirdauth"
+	"apps/app/apis/stayy/api/internal/repository/event"
 	"apps/app/apis/stayy/api/internal/repository/rpc"
+	"apps/app/apis/stayy/api/internal/repository/xredis"
 )
 
 // 类型别名，方便 Logic 层使用
 type (
 	AuthzSrvType     = rpc.AuthzSrv
 	UserSrvType      = rpc.UserSrv
-	ThirdAuthManager = thirdauth.Manager
+	ThirdAuthManager  = thirdauth.Manager
+	TokenRdsModelType = xredis.TokenModel
+	NotifyEventType    = event.NotifyEvent
 )
 ```
 
@@ -188,12 +203,10 @@ package rpc
 
 import (
 	authzV1Pb "apps/pb/services/shared/authz/v1"
-
 	"github.com/zeromicro/go-zero/zrpc"
 )
 
 //go:generate mockgen -package rpc -destination mock_authz_service.go apps/pb/services/shared/authz/v1 AuthzServiceClient
-
 type AuthzSrv struct {
 	AuthzServicev1Client authzV1Pb.AuthzServiceClient
 }
@@ -264,6 +277,126 @@ func (m *tokenModel) GetToken(ctx context.Context, userID int64) (string, error)
 		return "", err
 	}
 	return token, nil
+}
+```
+
+## event/ - MQ 事件发送
+
+MQ 事件发送按业务定义在 `repository/event/` 下，每个文件一个业务模块。
+
+参考：[event.md](./event.md)
+
+**notify_event.go - 通知事件**
+
+```go
+package event
+
+import (
+	"context"
+	"fmt"
+
+	notifyMqPb "apps/pb/common/mq"
+	"apps/pkg/queue"
+)
+
+const (
+	// TopicKey 主题 key
+	notifyTopic = "notify_topic"
+
+	// MessageKeys 消息 key
+	emailNotifyKey  = "notify.email"
+	smsNotifyKey    = "notify.sms"
+	pushNotifyKey   = "notify.push"
+)
+
+// NotifyEvent 通知事件接口
+//
+//go:generate mockgen -package event -destination mock_notify_event.go -source notify_event.go NotifyEvent
+type NotifyEvent interface {
+	// SendEmail 发送邮件通知
+	SendEmail(ctx context.Context, to string, subject string, content string) error
+
+	// SendSMS 发送短信通知
+	SendSMS(ctx context.Context, mobile string, template string, params map[string]string) error
+
+	// SendPush 发送推送通知
+	SendPush(ctx context.Context, userID int64, title string, message string) error
+
+	// Close 关闭事件发送器
+	Close()
+}
+
+type notifyEvent struct {
+	pusher queue.Pusher
+	topic  string
+}
+
+// NewNotifyEvent 创建通知事件发送器
+func NewNotifyEvent(pusher queue.Pusher, topic string) NotifyEvent {
+	return &notifyEvent{
+		pusher: pusher,
+		topic:  topic,
+	}
+}
+
+func (n *notifyEvent) formatKey(key string) string {
+	return n.topic + ":" + key
+}
+
+// SendEmail 发送邮件通知（同步发送）
+func (n *notifyEvent) SendEmail(ctx context.Context, to string, subject string, content string) error {
+	req := &notifyMqPb.EmailNotifyReq{
+		To:      to,
+		Subject:  subject,
+		Content:  content,
+	}
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return fmt.Errorf("marshal email notify message failed, to: %s, err: %v", to, err)
+	}
+
+	// 使用 SendWithKey 根据 key 发送到不同分区
+	key := n.formatKey(emailNotifyKey)
+	return n.pusher.SendWithKey(ctx, key, data)
+}
+
+// SendSMS 发送短信通知（同步发送）
+func (n *notifyEvent) SendSMS(ctx context.Context, mobile string, template string, params map[string]string) error {
+	req := &notifyMqPb.SMSNotifyReq{
+		Mobile:   mobile,
+		Template: template,
+		Params:   params,
+	}
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return fmt.Errorf("marshal sms notify message failed, mobile: %s, err: %:v", mobile, err)
+	}
+
+	// 使用 SendWithKey 根据 key 发送到不同分区
+	key := n.formatKey(smsNotifyKey)
+	return n.pusher.SendWithKey(ctx, key, data)
+}
+
+// SendPush 发送推送通知（同步发送）
+func (n *notifyEvent) SendPush(ctx context.Context, userID int64, title string, message string) error {
+	req := &notifyMqPb.PushNotifyReq{
+		UserId:  userID,
+		Title:    title,
+		Message:  message,
+	}
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return fmt.Errorf("marshal push notify message failed, user_id: %d, err: %v", userID, err)
+	}
+
+	// 使用 SendWithKey 根据 key 发送到不同分区
+	key := n.formatKey(pushNotifyKey)
+	return n.pusher.SendWithKey(ctx, key, data)
+}
+
+// Close 关闭事件发送器
+func (n *notifyEvent) Close() {
+	n.pusher.Close()
 }
 ```
 

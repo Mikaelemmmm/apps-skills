@@ -8,11 +8,11 @@
 protos/common/
 ├── enum/          # 公共枚举类型
 ├── errors/        # 错误前缀定义
-└── message/       # 公共 Message
-    ├── mq/        # MQ 消息体定义（按服务名独立文件）
-    ├── empty.proto
-    ├── page.proto
-    └── ...
+├── message/       # 公共 Message
+│   ├── empty.proto
+│   ├── page.proto
+│   └── ...
+└── mq/           # MQ 消息体定义（按服务名独立文件）
 ```
 
 ## 各目录用途
@@ -55,12 +55,12 @@ enum ErrorPrefix {
 
 #### 3.2 MQ 消息体
 
-所有 MQ 消息体定义在 `common/message/mq/` 下，按服务名独立文件。
+所有 MQ 消息体定义在 `common/mq/` 下，按服务名独立文件。
 
 ```
-common/message/mq/
-├── user_message.proto    # 用户相关 MQ 消息
-├── order_message.proto   # 订单相关 MQ 消息
+common/mq/
+├── user.proto    # 用户相关 MQ 消息
+├── order.proto   # 订单相关 MQ 消息
 └── ...
 ```
 
@@ -77,7 +77,7 @@ common/message/mq/
 import "common/message/empty.proto";
 import "common/message/page.proto";
 import "common/enum/enable_status.proto";
-import "common/message/mq/user_message.proto";
+import "common/mq/user.proto";
 ```
 
 ### 使用 Empty 返回值

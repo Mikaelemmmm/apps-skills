@@ -28,6 +28,7 @@ type UserLogic struct {
 	svcCtx           *svc.ServiceContext
 	thirdAuthManager *repository.ThirdAuthManager
 	userSrv          *repository.UserSrvType
+	tokenRdsModel    repository.TokenRdsModelType
 }
 
 // NewUserLogic 创建用户逻辑
@@ -36,6 +37,7 @@ func NewUserLogic(svcCtx *svc.ServiceContext) *UserLogic {
 		svcCtx:           svcCtx,
 		thirdAuthManager: svcCtx.Repo.WXMiniAuthClient,
 		userSrv:          svcCtx.Repo.UserSrv,
+		tokenRdsModel:    svcCtx.Repo.TokenRdsModel,
 	}
 }
 
@@ -83,6 +85,48 @@ func (l *UserLogic) WXMiniAuth(ctx context.Context, req *pb.WXMiniAuthReq) (*pb.
 		AccessExpire:  resp.GetToken().AccessExpire,
 		RefreshExpire: resp.GetToken().GetRefreshExpire(),
 	}, nil
+}
+```
+
+## Redis 操作示例
+
+```go
+// VerifyToken 验证 Token
+func (l *UserLogic) VerifyToken(ctx context.Context, req *pb.VerifyTokenReq) (*pb.VerifyTokenReply, error) {
+	// 使用 TokenRdsModel 查询 Token
+	token, err := l.tokenRdsModel.GetToken(ctx, req.UserId)
+	if err != nil {
+		return nil, xerr.NewMsgWithErrorLog(
+			xerr.SystemError_S_ERROR,
+			"get token failed",
+			"user_id: %d, err: %v", req.UserId, err,
+		)
+	}
+
+	if token != req.Token {
+		return nil, xerr.NewMsgWithErrorLog(
+			errors.UserError_ERROR_PREFIX_APIS_STAYY_API,
+			"token mismatch",
+			"user_id: %d", req.UserId,
+		)
+	}
+
+	return &pb.VerifyTokenReply{Valid: true}, nil
+}
+
+// RevokeToken 撤销 Token
+func (l *UserLogic) RevokeToken(ctx context.Context, req *pb.RevokeTokenReq) (*pb.RevokeTokenReply, error) {
+	// 使用 TokenRdsModel 删除 Token（加入黑名单）
+	_, err := l.tokenRdsModel.DelToken(ctx, req.UserId, 86400) // 黑名单有效期 24 小时
+	if err != nil {
+		return nil, xerr.NewMsgWithErrorLog(
+			xerr.SystemError_S_ERROR,
+			"revoke token failed",
+			"user_id: %d, err: %v", req.UserId, err,
+		)
+	}
+
+	return &pb.RevokeTokenReply{Success: true}, nil
 }
 ```
 
@@ -162,6 +206,7 @@ func TestUserLogic_WXMiniAuth(t *testing.T) {
 	mockRepo := &repository.Repository{
 		WXMiniAuthClient: &mockThirdAuthClient{},
 		UserSrv:         &mockUserSrv{},
+		TokenRdsModel:    &mock.MockTokenModel{},
 	}
 
 	svcCtx := &svc.ServiceContext{

@@ -36,7 +36,9 @@ service PermitService {
 }
 
 message Resource {
+  // 请求路径
   string path = 1;
+  // 请求方法
   string method = 2;
 }
 
@@ -91,19 +93,19 @@ option go_package = "apps/pb/services/shared/permit/v1";
 
 定义 RPC 服务前，先评估其归属类型：
 
-| 类型 | 说明 | 示例 |
-|-----|------|-----|
-| **core** | 核心业务领域 | user, order, payment |
-| **shared** | 跨业务共享 | authz, permit |
-| **support** | 支撑服务 | message, file |
+| 类型        | 说明         | 示例                 |
+| ----------- | ------------ | -------------------- |
+| **core**    | 核心业务领域 | user, order, payment |
+| **shared**  | 跨业务共享   | authz, permit        |
+| **support** | 支撑服务     | message, file        |
 
 ### 4. @Desc 注解使用
 
-| 位置 | 是否使用 @Desc |
-|-----|---------------|
-| Service | ✅ 必须 |
-| RPC 方法 | ✅ 必须 |
-| Message | ❌ 使用普通 `//` 注释 |
+| 位置         | 是否使用 @Desc        |
+| ------------ | --------------------- |
+| Service      | ✅ 必须               |
+| RPC 方法     | ✅ 必须               |
+| Message      | ❌ 使用普通 `//` 注释 |
 | Message 字段 | ❌ 使用普通 `//` 注释 |
 
 ### 5. 空返回使用 common.message.Empty

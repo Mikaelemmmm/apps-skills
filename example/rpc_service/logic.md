@@ -32,15 +32,17 @@ const (
 
 // GenTokenService 生成 Token 服务
 type GenTokenService struct {
-	ctx    context.Context
-	svcCtx *svc.ServiceContext
+	ctx          context.Context
+	svcCtx       *svc.ServiceContext
+	tokenRdsModel repository.TokenRdsModelType
 }
 
 // NewGenTokenService 创建生成 Token 服务
 func NewGenTokenService(ctx context.Context, svcCtx *svc.ServiceContext) *GenTokenService {
 	return &GenTokenService{
-		ctx:    ctx,
-		svcCtx: svcCtx,
+		ctx:          ctx,
+		svcCtx:       svcCtx,
+		tokenRdsModel: svcCtx.Repo.TokenRdsModel,
 	}
 }
 
@@ -53,6 +55,15 @@ func (s *GenTokenService) GenToken(req *pb.GenTokenReq) (*pb.GenTokenReply, erro
 	accessToken, err := s.getJwtToken(tokenStartTime, req)
 	if err != nil {
 		return nil, err
+	}
+
+	// 保存 Token 到 Redis
+	if err := s.tokenRdsModel.GenToken(s.ctx, req.Uid, accessToken, int(accessExpire)); err != nil {
+		return nil, xerr.NewMsgWithErrorLog(
+			xerr.SystemError_D_ERROR,
+			"save token to redis failed",
+			"user_id: %d, err: %v", req.Uid, err,
+		)
 	}
 
 	return &pb.GenTokenReply{
@@ -88,6 +99,80 @@ func (s *GenTokenService) getJwtToken(startTime int64, req *pb.GenTokenReq) (str
 	}
 
 	return result, nil
+}
+```
+
+## Redis 操作示例
+
+```go
+// VerifyTokenService 验证 Token 服务
+type VerifyTokenService struct {
+	ctx          context.Context
+	svcCtx       *svc.ServiceContext
+	tokenRdsModel repository.TokenRdsModelType
+}
+
+// NewVerifyTokenService 创建验证 Token 服务
+func NewVerifyTokenService(ctx context.Context, svcCtx *svc.ServiceContext) *VerifyTokenService {
+	return &VerifyTokenService{
+		ctx:          ctx,
+		svcCtx:       svcCtx,
+		tokenRdsModel: svcCtx.Repo.TokenRdsModel,
+	}
+}
+
+// VerifyToken 验证 Token
+func (s *VerifyTokenService) VerifyToken(req *pb.VerifyTokenReq) (*pb.VerifyTokenReply, error) {
+	// 使用 TokenRdsModel 查询 Token
+	token, err := s.tokenRdsModel.GetToken(s.ctx, req.Uid)
+	if err != nil {
+		return nil, xerr.NewMsgWithErrorLog(
+			xerr.SystemError_D_ERROR,
+			"get token failed",
+			"user_id: %d, err: %v", req.Uid, err,
+		)
+	}
+
+	if token != req.Token {
+		return nil, xerr.NewMsgWithErrorLog(
+			errors.AuthorizationError_ERROR_PREFIX_SERVICES_AUTHZ_AUTHORIZATION,
+			"token mismatch",
+			"user_id: %d", req.Uid,
+		)
+	}
+
+	return &pb.VerifyTokenReply{Valid: true}, nil
+}
+
+// RevokeTokenService 撤销 Token 服务
+type RevokeTokenService struct {
+	ctx          context.Context
+	svcCtx       *svc.ServiceContext
+	tokenRdsModel repository.TokenRdsModelType
+}
+
+// NewRevokeTokenService 创建撤销 Token 服务
+func NewRevokeTokenService(ctx context.Context, svcCtx *svc.ServiceContext) *RevokeTokenService {
+	return &RevokeTokenService{
+		ctx:          ctx,
+		svcCtx:       svcCtx,
+		tokenRdsModel: svcCtx.Repo.TokenRdsModel,
+	}
+}
+
+// RevokeToken 撤销 Token
+func (s *RevokeTokenService) RevokeToken(req *pb.RevokeTokenReq) (*pb.RevokeTokenReply, error) {
+	// 使用 TokenRdsModel 删除 Token（加入黑名单）
+	_, err := s.tokenRdsModel.DelToken(s.ctx, req.Uid, 86400) // 黑名单有效期 24 小时
+	if err != nil {
+		return nil, xerr.NewMsgWithErrorLog(
+			xerr.SystemError_D_ERROR,
+			"revoke token failed",
+			"user_id: %d, err: %v", req.Uid, err,
+		)
+	}
+
+	return &pb.RevokeTokenReply{Success: true}, nil
 }
 ```
 

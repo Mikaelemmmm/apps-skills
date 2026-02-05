@@ -116,9 +116,34 @@ make gen type=services srv=core/user
 | 文件 | 说明 |
 |-----|------|
 | [server_grpc.md](../example/rpc_service/server_grpc.md) | gRPC Server 注册 |
-| [repository.md](../example/rpc_service/repository.md) | Repository 层结构 |
-| [svc_context.md](../example/rpc_service/svc_context.md) | ServiceContext 初始化 |
-| [logic.md](../example/rpc_service/logic.md) | Logic/Service 层业务逻辑 |
+| [repository.md](../example/rpc_service/repository.md) | Repository 层结构（共享） |
+| [svc_context.md](../example/rpc_service/svc_context.md) | ServiceContext 初始化（共享） |
+| [logic.md](../example/rpc_service/logic.md) | Logic/Service 层业务逻辑（gRPC） |
+
+### Job 相关
+
+| 文件 | 说明 |
+|-----|------|
+| [rpc_service_job_patterns.md](../references/rpc_service_job_patterns.md) | Job 开发模式说明 |
+| [job/handler.md](../example/rpc_service/job/handler.md) | Job Handler 示例 |
+| [job/logic.md](../example/rpc_service/job/logic.md) | Job Logic 示例 |
+| [job/repository.md](../example/rpc_service/job/repository.md) | Job Repository 层示例 |
+| [job/config.md](../example/rpc_service/job/config.md) | Job Config 示例 |
+| [job/server.md](../example/rpc_service/job/server.md) | Job Server 示例 |
+| [job/svc_context.md](../example/rpc_service/job/svc_context.md) | ServiceContext 初始化（与 gRPC 共享） |
+
+### MQ 相关
+
+| 文件 | 说明 |
+|-----|------|
+| [rpc_service_mq_patterns.md](../references/rpc_service_mq_patterns.md) | MQ 开发模式说明 |
+| [mq/handler.md](../example/rpc_service/mq/handler.md) | MQ Handler 示例 |
+| [mq/logic.md](../example/rpc_service/mq/logic.md) | MQ Logic 示例 |
+| [mq/repository.md](../example/rpc_service/mq/repository.md) | MQ Repository 层示例 |
+| [mq/config.md](../example/rpc_service/mq/config.md) | MQ Config 示例 |
+| [mq/server.md](../example/rpc_service/mq/server.md) | MQ Server 示例 |
+| [mq/svc_context.md](../example/rpc_service/mq/svc_context.md) | ServiceContext 初始化（与 gRPC 共享） |
+| [mq/proto_message.md](../example/rpc_service/mq/proto_message.md) | MQ Protobuf 消息定义 |
 
 ## 设计原则
 

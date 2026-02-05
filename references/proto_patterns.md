@@ -24,8 +24,8 @@ protos/
 ├── common/            # 公共协议
 │   ├── enum/          # 公共枚举
 │   ├── errors/        # 错误前缀定义
-│   └── message/       # 公共 Message（分页、状态等）
-│       └── mq/        # MQ 消息体定义
+│   ├── message/       # 公共 Message（分页、状态等）
+│   └── mq/           # MQ 消息体定义
 └── third_party/       # 三方 proto（无需修改）
 ```
 
