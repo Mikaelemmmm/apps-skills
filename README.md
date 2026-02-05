@@ -1,6 +1,9 @@
+
 # apps skills
 
-本技能包提供企业级内部微服务基础框架开发规范，专为 AI Agent 优化，帮助开发者构建生产级服务。覆盖内容：REST API、RPC 服务、数据库操作、问题排查、日志与错误码处理。
+本技能包提供企业级内部微服务基础框架开发规范，专为 AI Agent 优化，帮助开发者构建生产级服务。覆盖内容：REST API、RPC 服务、Job、MQ、数据库操作、问题排查、日志与错误码处理。
+
+【注】: AI在使用该技能时候不要一次全部加载，要按需加载需要的功能、模块文档
 
 ---
 
@@ -24,12 +27,11 @@
 │  │ HTTP 服务   │  → 直接操作数据库，包含所有业务逻辑                       │
 │  └─────────────┘                                                         │
 │                                                                         │
-│  适用：小团队、简单业务、快速开发                                          │
+│ 适用：小团队、简单业务、快速开发                                          │
 └─────────────────────────────────────────────────────────────────────────┘
-
 ┌─────────────────────────────────────────────────────────────────────────┐
 │ 方案二：HTTP + gRPC                                                      │
-│                                                                         │
+│                                                                         │[truncated]
 │  ┌─────────────┐     gRPC      ┌─────────────┐                          │
 │  │ HTTP 服务   │  ──────────▶  │ gRPC 服务   │  → 数据库                │
 │  │ (业务逻辑)   │               │ (原子服务)   │                          │
@@ -38,9 +40,8 @@
 │  - HTTP：业务逻辑编排、调用多个 gRPC 服务                                  │
 │  - gRPC：原子操作、可被多个 HTTP 服务复用的功能                              │
 │                                                                         │
-│  适用：中、大团队、需要服务复用、HTTP 层有业务逻辑                              │
+│ 适用：中、大团队、需要服务复用、HTTP 层有业务逻辑                              │
 └─────────────────────────────────────────────────────────────────────────┘
-
 ┌─────────────────────────────────────────────────────────────────────────┐
 │ 方案三：BFF + 领域服务                                                    │
 │                                                                         │
@@ -56,10 +57,10 @@
 │           │  (gRPC)     │                                               │
 │           └─────────────┘                                               │
 │                                                                         │
-│  - BFF：“查询”聚合裁剪、“增删改”透传写入（无业务逻辑）                                     │
+│  - BFF："查询"聚合裁剪、"增删改"透传写入（无业务逻辑）                                     │
 │  - 领域服务：核心业务逻辑、可被多个 BFF 复用                                │
 │                                                                         │
-│  适用：中、大团队、多端接入、领域驱动设计                                       │
+│ 适用：中、大团队、多端接入、领域驱动设计                                       │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -76,14 +77,16 @@
 
 当在项目中开发后端业务需求时，参考以下对应模块的规范文档：
 
-| 开发场景              | 参考文档                                                                   |
-| --------------------- | -------------------------------------------------------------------------- |
-| **Protobuf 协议定义** | [proto_patterns.md](refrences/proto_patterns.md)                           |
-| **REST API 开发**     | [rest_api_patterns.md](refrences/rest_api_patterns.md)                     |
-| **RPC 服务开发**      | [rpc_service_patterns.md](refrences/rpc_service_patterns.md)               |
-| **数据库操作**        | [database_patterns.md](refrences/database_patterns.md)                     |
-| **错误码与日志**      | [error_code_and_log_patterns.md](refrences/error_code_and_log_patterns.md) |
-| **代码质量规范**      | [code_quality.md](refrences/code_quality.md)                               |
+| 开发场景              | 参考文档                                                                    |
+| --------------------- | --------------------------------------------------------------------------- |
+| **Protobuf 协议定义** | [proto_patterns.md](references/proto_patterns.md)                           |
+| **REST API 开发**     | [rest_api_patterns.md](references/rest_api_patterns.md)                     |
+| **RPC 服务开发**      | [rpc_service_patterns.md](references/rpc_service_patterns.md)               |
+| **MQ 消息队列开发**   | [rest_api_mq_patterns.md](references/rest_api_mq_patterns.md)               |
+| **Job 定时任务开发**  | [rest_api_job_patterns.md](references/rest_api_job_patterns.md)             |
+| **数据库操作**        | [database_patterns.md](references/database_patterns.md)                     |
+| **错误码与日志**      | [error_code_and_log_patterns.md](references/error_code_and_log_patterns.md) |
+| **代码质量规范**      | [code_quality.md](references/code_quality.md)                               |
 
 ---
 
@@ -92,33 +95,23 @@
 ```
 apps-skills/
 ├── SKILL.md                          # 技能包主入口（本文件）
-├── refrences/                        # 模式参考文档（规范说明）
-│   ├── proto_patterns.md             # Protobuf 协议定义规范
-│   ├── rest_api_patterns.md          # REST API 开发模式
-│   ├── rpc_service_patterns.md       # RPC 服务开发模式
-│   ├── database_patterns.md          # 数据库操作规范
-│   ├── error_code_and_log_patterns.md # 错误码与日志规范
-│   └── code_quality.md              # 代码质量规范（单测、Lint、Review）
+├── references/                        # 模式参考文档（规范说明）
+│   ├── proto_patterns.md
+│   ├── rest_api_patterns.md
+│   ├── rpc_service_patterns.md
+│   ├── rest_api_mq_patterns.md
+│   ├── rest_api_job_patterns.md
+│   ├── rpc_service_mq_patterns.md
+│   ├── rpc_service_job_patterns.md
+│   ├── database_patterns.md
+│   ├── error_code_and_log_patterns.md
+│   └── code_quality.md
 └── example/                          # 代码示例
-    ├── proto_define/                 # Protobuf 定义示例
-    │   ├── rest_proto.md             # REST API 协议示例
-    │   ├── rpc_proto.md              # RPC 服务协议示例
-    │   ├── error_code_proto.md       # 错误码定义示例
-    │   └── common_proto.md           # 公共协议示例
-    ├── rest_api/                     # REST API 代码示例
-    │   ├── repository.md             # Repository 层示例
-    │   ├── svc_context.md            # ServiceContext 示例
-    │   └── logic.md                  # Logic 层示例
-    ├── rpc_service/                  # RPC 服务代码示例
-    │   ├── server_grpc.md            # gRPC Server 注册示例
-    │   ├── repository.md             # Repository 层示例
-    │   ├── svc_context.md            # ServiceContext 示例
-    │   └── logic.md                  # Logic 层示例
-    ├── database/                     # 数据库操作示例
-    │   └── mysql.md                  # MySQL Model 示例
-    └── error_log/                    # 错误与日志示例
-        ├── error_code.md             # 错误码使用示例
-        └── log.md                    # 日志使用示例
+    ├── proto_define/
+    ├── rest_api/
+    ├── rpc_service/
+    ├── database/
+    └── error_log/
 ```
 
 ---
@@ -175,7 +168,6 @@ make lint
 
 # 运行单元测试
 make test
-
 ```
 
 ---
@@ -188,6 +180,6 @@ make test
 | **Lint 检查**   | 必须通过 golangci-lint,v2版本,test file no lint | 见下方规则，不要使用v1版本 |
 | **代码 Review** | 必须通过 Code Review                            | 见下方检查点               |
 
-详细规范参考：[code_quality.md](refrences/code_quality.md)
+详细规范参考：[code_quality.md](references/code_quality.md)
 
 ---
