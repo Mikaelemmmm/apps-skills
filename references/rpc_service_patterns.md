@@ -88,7 +88,12 @@ app/services/{type}/{service}/
 ├── internal/
 │   ├── config/           # 配置定义
 │   ├── logic/            # 业务逻辑层（或 service/）
-│   ├── manager/          # Logic 复用层
+│   │   └── userv1/
+│   │       ├── userservice/           # user logic
+│   │       │   └── shared/            # user logic shared code
+│   │       └── userthirdservice/
+│   │           └── shared/            # user third logic shared code
+│   ├── manager/          # Logic 复用层（跨 logic 共享）
 │   ├── repository/       # 依赖注入层
 │   │   ├── model/        # 数据库 Model
 │   │   ├── rpc/          # RPC 客户端

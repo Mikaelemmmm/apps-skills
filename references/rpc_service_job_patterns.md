@@ -109,9 +109,13 @@ app/services/{type}/{service}/
     │   └── config.go     # 添加 JobConfig
     ├── job/               # Job Handler（调用 Logic）
     │   └── xxxxx_job.go
-    ├── logic/
-    │   └── job/          # Job 业务逻辑层
-    │       └── xxx_logic.go
+    ├── logic/            # 业务逻辑层
+    │   └── job/
+    │       ├── userservice/           # user job logic
+    │       │   └── shared/            # user job logic shared code
+    │       └── userthirdservice/
+    │           └── shared/            # user third job logic shared code
+    ├── manager/          # Logic 复用层（跨 logic 共享）
     ├── repository/       # 依赖注入层（与 gRPC 共享）
     │   ├── model/        # 数据库 Model
     │   ├── rpc/          # RPC 客户端

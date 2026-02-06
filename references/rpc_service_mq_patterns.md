@@ -91,9 +91,13 @@ app/services/{type}/{service}/
     │   └── config.go     # 添加 MqConfig
     ├── mq/               # MQ Handler（解析参数，调用 Logic）
     │   └── xxx_mq.go
-    ├── logic/
-    │   └── mq/          # MQ 业务逻辑层
-    │       └── xxx_logic.go
+    ├── logic/            # 业务逻辑层
+    │   └── mq/
+    │       ├── userservice/           # user mq logic
+    │       │   └── shared/            # user mq logic shared code
+    │       └── userthirdservice/
+    │           └── shared/            # user third mq logic shared code
+    ├── manager/          # Logic 复用层（跨 logic 共享）
     ├── repository/       # 依赖注入层（与 gRPC 共享）
     │   ├── model/        # 数据库 Model
     │   ├── rpc/          # RPC 客户端

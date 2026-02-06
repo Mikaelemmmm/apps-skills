@@ -90,7 +90,12 @@ app/apis/{app}/{layer}/
     ├── config/           # 配置定义
     ├── handler/          # HTTP 处理器（生成）
     ├── logic/            # 业务逻辑层
-    ├── manager/          # Logic 复用层
+    │   └── userv1/
+    │       ├── userservice/           # user logic
+    │       │   └── shared/            # user logic shared code
+    │       └── userthirdservice/
+    │           └── shared/            # user third logic shared code
+    ├── manager/          # Logic 复用层（跨 logic 共享）
     ├── repository/       # 依赖注入层
     │   ├── adapter/      # 三方服务适配器
     │   ├── rpc/          # RPC 客户端
