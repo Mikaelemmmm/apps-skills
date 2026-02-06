@@ -110,9 +110,11 @@ allowed-tools:
 | --------------------- | --------------------------------------------------------------------------- |
 | **Protobuf 协议定义** | [proto_patterns.md](references/proto_patterns.md)                           |
 | **REST API 开发**     | [rest_api_patterns.md](references/rest_api_patterns.md)                     |
+| **REST MQ 消息队列开发**   | [rest_api_mq_patterns.md](references/rest_api_mq_patterns.md)               |
+| **REST Job 定时任务开发**  | [rest_api_job_patterns.md](references/rest_api_job_patterns.md)             |
 | **RPC 服务开发**      | [rpc_service_patterns.md](references/rpc_service_patterns.md)               |
-| **MQ 消息队列开发**   | [rest_api_mq_patterns.md](references/rest_api_mq_patterns.md)               |
-| **Job 定时任务开发**  | [rest_api_job_patterns.md](references/rest_api_job_patterns.md)             |
+| **RPC MQ 消息队列开发**   | [rest_api_mq_patterns.md](references/rpc_service_mq_patterns.md)               |
+| **RPC Job 定时任务开发**  | [rest_api_job_patterns.md](references/rpc_service_job_patterns.md)             |
 | **数据库操作**        | [database_patterns.md](references/database_patterns.md)                     |
 | **错误码与日志**      | [error_code_and_log_patterns.md](references/error_code_and_log_patterns.md) |
 | **代码质量规范**      | [code_quality.md](references/code_quality.md)                               |
