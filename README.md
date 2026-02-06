@@ -8,7 +8,7 @@
 
 ## 使用效果
 
-![使用效果](./images/video_converted.gif)
+![使用效果](./images/use-effect.gif)
 
 ## 架构模式选择
 
